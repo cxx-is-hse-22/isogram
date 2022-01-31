@@ -21,25 +21,29 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: GitHub API Request
-      # You may pin to the exact commit or the version.
-      # uses: octokit/request-action@7e93b91076fad3920c29d44eb2a6311d929db3dd
-      uses: octokit/request-action@v2.1.0
+      uses: actions/github-script@v5
       with:
-        # HTTP Verb + path as shown on https://developer.github.com/v3/
-        route: PUT /repos/{owner}/{repo}/branches/{branch}/protection
-        branch: feedback
-        required_status_checks: |
-          strict: false
-          contexts:
-          - GitHub Classroom Workflow
-        enforce_admins: false
-        required_pull_request_reviews: |
-          dismissal_restrictions: null
-          required_approving_review_count: 1
-        restrictions: null
-        allow_force_pushes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+        script: |
+          github.request("PUT /repos/{owner}/{repo}/branches/{branch}/protection", {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            branch: "feedback",
+            "required_status_checks": {
+              "strict": false,
+              "contexts": ["Autograding"],
+              "checks": [
+                {
+                  "context": "Autograding",
+                  "app_id": 15368
+                }
+              ]
+            },
+            "required_pull_request_reviews": {
+              "dismiss_stale_reviews": false,
+              "require_code_owner_reviews": false,
+              "required_approving_review_count": 1
+            },
+            "restrictions": null
+          })
 
           
